@@ -15,6 +15,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
+
     private int temperature=60;
     private int rain=60;
     private int humidity=60;
@@ -47,9 +48,7 @@ public class MainActivity extends AppCompatActivity {
         title_humidity.setText("Humidity");
         btn1=findViewById(R.id.btn_refresh);
 
-
         updateProgressBar();
-
 
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -58,10 +57,9 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-
         updateProgressBar();
     }
+
     private void updateProgressBar() {
         progressBar.setProgress(temperature);
         progressBar_Rain.setProgress(rain);
