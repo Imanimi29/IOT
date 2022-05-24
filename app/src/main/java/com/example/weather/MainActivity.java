@@ -3,6 +3,7 @@ package com.example.weather;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -17,6 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
@@ -26,19 +28,82 @@ import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private int temperature=60;
-    private int rain=60;
-    private int humidity=60;
+    private double temperature = 0;
+    private int rain = 0;
+    private double humidity = 0;
+    private double light = 0;
 
     ProgressBar progressBar,progressBar_Rain,progressBar_Humidity;
     Button btn1;
     TextView textView,textViewProgress,textView_RainValue,textView_humidityValue,textView_todayDate,title_rain,title_humidity;
     ConstraintLayout layout;
+    ProgressDialog nDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initViews();
+        getData();
+
+        btn1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getData();
+            }
+        });
+    }
+
+    private void updateProgressBar() {
+        progressBar.setProgress((int) temperature);
+        progressBar_Rain.setProgress(rain);
+        progressBar_Humidity.setProgress((int) humidity);
+        textView_humidityValue.setText(humidity+"%");
+        textView_RainValue.setText(rain+"%");
+        char degreesymbol = '\u00B0';
+        textView.setText(temperature+" F");
+        if(temperature>50)
+        {
+            layout.setBackgroundResource(R.drawable.sun);
+        }
+        else
+        {
+            layout.setBackgroundResource(R.drawable.rain);
+        }
+
+        nDialog.dismiss();
+    }
+
+    private void getData() {
+        nDialog.show();
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, "https://api.thingspeak.com/channels/1733817/feeds.json?api_key=R479FUYYPK4LX4I3&results=1", null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("API response", response.toString());
+                try {
+                    //Log.d("API", (String) ((JSONObject) response.getJSONArray("feeds").get(0)).get("field1"));
+                    temperature = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field1").toString());
+                    humidity = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field2").toString());
+                    rain = Integer.parseInt(((JSONObject) response.getJSONArray("feeds").get(0)).get("field3").toString());
+                    light = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field4").toString());
+                    updateProgressBar();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("API Error!",error.toString());
+            }
+        });
+
+        requestQueue.add(jsonObjectRequest);
+    }
+
+    private void initViews(){
         progressBar=findViewById(R.id.progress_bar);
         progressBar_Rain=findViewById(R.id.progress_bar2_rain);
         progressBar_Humidity=findViewById(R.id.progress_bar1_humidity);
@@ -58,49 +123,10 @@ public class MainActivity extends AppCompatActivity {
         title_humidity.setText("Humidity");
         btn1=findViewById(R.id.btn_refresh);
 
-        updateProgressBar();
-
-        btn1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                updateProgressBar();
-            }
-        });
-
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
-
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, "https://jsonplaceholder.typicode.com/todos/1", null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.d("API response", response.toString());
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("API Error!",error.toString());
-            }
-        });
-
-        requestQueue.add(jsonObjectRequest);
-
-        updateProgressBar();
-    }
-
-    private void updateProgressBar() {
-        progressBar.setProgress(temperature);
-        progressBar_Rain.setProgress(rain);
-        progressBar_Humidity.setProgress(humidity);
-        textView_humidityValue.setText(rain+"%");
-        textView_RainValue.setText(humidity+"%");
-        char degreesymbol = '\u00B0';
-        textView.setText(temperature+" F");
-        if(temperature>50)
-        {
-            layout.setBackgroundResource(R.drawable.sun);
-        }
-        else
-        {
-            layout.setBackgroundResource(R.drawable.rain);
-        }
+        nDialog = new ProgressDialog(this);
+        nDialog.setMessage("Updating");
+        nDialog.setTitle("Updating");
+        nDialog.setIndeterminate(false);
+        nDialog.setCancelable(false);
     }
 }
