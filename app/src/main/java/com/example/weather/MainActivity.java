@@ -1,10 +1,20 @@
 package com.example.weather;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.ProgressDialog;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Message;
+import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -33,18 +43,38 @@ public class MainActivity extends AppCompatActivity {
     private double humidity = 0;
     private double light = 0;
 
-    ProgressBar progressBar,progressBar_Rain,progressBar_Humidity;
-    Button btn1;
-    TextView textView,textViewProgress,textView_RainValue,textView_humidityValue,textView_todayDate,title_rain,title_humidity;
-    ConstraintLayout layout;
-    ProgressDialog nDialog;
+    private final int JOB_1 = 1;
+    private final int JOB_1_RESPONSE = 2;
+
+    private Messenger messenger = null;
+
+    private ProgressBar progressBar,progressBar_Rain,progressBar_Humidity;
+    private Button btn1;
+    private TextView textView,textViewProgress,textView_RainValue,textView_humidityValue,textView_todayDate,title_rain,title_humidity;
+    private ConstraintLayout layout;
+    private ProgressDialog nDialog;
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            messenger = new Messenger(service);
+            getData();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            messenger = null;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        getData();
+
+        Intent intent = new Intent(this,FetchData.class);
+        bindService(intent,serviceConnection, Context.BIND_AUTO_CREATE);
 
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,31 +106,14 @@ public class MainActivity extends AppCompatActivity {
 
     private void getData() {
         nDialog.show();
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, "https://api.thingspeak.com/channels/1733817/feeds.json?api_key=R479FUYYPK4LX4I3&results=1", null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.d("API response", response.toString());
-                try {
-                    //Log.d("API", (String) ((JSONObject) response.getJSONArray("feeds").get(0)).get("field1"));
-                    temperature = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field1").toString());
-                    humidity = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field2").toString());
-                    rain = Integer.parseInt(((JSONObject) response.getJSONArray("feeds").get(0)).get("field3").toString());
-                    light = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field4").toString());
-                    updateProgressBar();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Log.d("API Error!",error.toString());
-            }
-        });
-
-        requestQueue.add(jsonObjectRequest);
+        Message msg = Message.obtain(null,JOB_1);
+        msg.replyTo = new Messenger(new ResponseHandler());
+        try {
+            messenger.send(msg);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     private void initViews(){
@@ -128,5 +141,29 @@ public class MainActivity extends AppCompatActivity {
         nDialog.setTitle("Updating");
         nDialog.setIndeterminate(false);
         nDialog.setCancelable(false);
+    }
+
+    @Override
+    protected void onStop() {
+        unbindService(serviceConnection);
+        messenger = null;
+        super.onStop();
+
+    }
+
+    class ResponseHandler extends Handler {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            if(msg.what == JOB_1_RESPONSE){
+                temperature = msg.getData().getDouble("temperature");
+                rain = msg.getData().getInt("rain");
+                humidity = msg.getData().getDouble("humidity");
+                light = msg.getData().getDouble("light");
+                updateProgressBar();
+            }
+            else{
+                super.handleMessage(msg);
+            }
+        }
     }
 }
