@@ -1,7 +1,15 @@
 package com.example.weather;
 
+import android.app.AlarmManager;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -11,6 +19,8 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.core.app.NotificationCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -23,6 +33,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class FetchData extends Service {
     private double temperature;
@@ -30,11 +42,31 @@ public class FetchData extends Service {
     private int rain;
     private double light;
 
+    private int counter = 0;
+
     private final int JOB_1 = 1;
     private final int JOB_1_RESPONSE = 2;
 
     private Messenger messenger = new Messenger(new IncomingHadnler());
 
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        super.onStartCommand(intent,flags,startId);
+
+        Handler mHandler = new Handler();
+        Runnable mRunnableTask = new Runnable()
+        {
+            @Override
+            public void run() {
+                counter++;
+                Log.d("FetchDataService","Counter is: "+counter);
+                mHandler.postDelayed(this,5000);
+            }
+        };
+        mHandler.postDelayed(mRunnableTask,5000);
+
+        return START_STICKY;
+    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -101,5 +133,16 @@ public class FetchData extends Service {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    public void onDestroy() {
+
+        Log.d("FetchDataService","Destroying FetchData Service");
+        Intent broadcastIntent = new Intent();
+        broadcastIntent.setAction("restartservice");
+        broadcastIntent.setClass(this, ServiceBroadcast.class);
+        this.sendBroadcast(broadcastIntent);
+
+        super.onDestroy();
     }
 }

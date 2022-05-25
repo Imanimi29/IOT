@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
         initViews();
 
         Intent intent = new Intent(this,FetchData.class);
+        startService(intent);
         bindService(intent,serviceConnection, Context.BIND_AUTO_CREATE);
 
         btn1.setOnClickListener(new View.OnClickListener() {
