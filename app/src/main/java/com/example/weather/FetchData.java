@@ -21,6 +21,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -50,6 +51,17 @@ public class FetchData extends Service {
     private Messenger messenger = new Messenger(new IncomingHadnler());
 
     @Override
+    public void onCreate() {
+        super.onCreate();
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            NotificationChannel channel = new NotificationChannel("WeatherAlert","Weather Alert",NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+    }
+
+    @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent,flags,startId);
 
@@ -60,6 +72,7 @@ public class FetchData extends Service {
             public void run() {
                 counter++;
                 Log.d("FetchDataService","Counter is: "+counter);
+                generateNotification(counter);
                 mHandler.postDelayed(this,5000);
             }
         };
@@ -133,6 +146,17 @@ public class FetchData extends Service {
         } catch (RemoteException e) {
             e.printStackTrace();
         }
+    }
+
+    private void generateNotification(int x){
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"WeatherAlert");
+        builder.setContentTitle("Weather Alert!");
+        builder.setContentText("Rain detected! "+x);
+        builder.setSmallIcon(R.drawable.ic_launcher_background);
+        builder.setAutoCancel(true);
+
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        notificationManagerCompat.notify(1,builder.build());
     }
 
     public void onDestroy() {
