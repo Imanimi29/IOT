@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parent_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#3F51B5"
+        android:fontFamily="sans-serif-thin"
+        android:padding="20dp"
+        android:text="Weather App"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp"
+        android:textStyle="bold"></TextView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_location"
+                        android:layout_width="204dp"
+                        android:layout_height="wrap_content"
+                        android:text="Lahore"
+                        android:textAlignment="textStart"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_today_date"
+                        android:layout_width="204dp"
+                        android:layout_height="wrap_content"
+                        android:text="Date"
+                        android:textAlignment="textStart"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp">
+
+                    </TextView>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:id="@+id/small_icon"
+                        android:layout_width="54dp"
+                        android:layout_height="34dp"
+                        android:layout_gravity="right" />
+
+                    <TextView
+                        android:id="@+id/temp_info"
+                        android:layout_width="193dp"
+                        android:layout_height="wrap_content"
+                        android:text="Mostly Cloudy"
+                        android:textAlignment="viewEnd"
+                        android:textColor="#FFFFFF"
+                        android:textSize="16sp"
+                        android:textStyle="normal" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <Switch
+                    android:id="@+id/switch_temp"
+                    android:layout_width="380dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:text="F" />
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="24dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="C"
+                    android:textAlignment="textStart"
+                    android:textSize="18sp" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/temp_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="90dp"
+                android:layout_marginBottom="257dp"
+                android:gravity="center"
+                android:text="75.3 F"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="@+id/progress_bar_temp"
+                app:layout_constraintEnd_toEndOf="@+id/progress_bar_temp"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="@+id/progress_bar_temp"
+                app:layout_constraintTop_toTopOf="@+id/progress_bar_temp"
+                app:layout_constraintVertical_bias="0.0" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_temp"
+                android:layout_width="220dp"
+                android:layout_height="220dp"
+                android:layout_gravity="center"
+                android:layout_marginStart="92dp"
+                android:layout_marginTop="4dp"
+                android:indeterminateOnly="false"
+                android:progressDrawable="@drawable/circle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="159dp">
+
+            <TextView
+                android:id="@+id/uv_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Light Index"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@id/progress_bar_uv"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.181"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.09" />
+
+            <TextView
+                android:id="@+id/hum_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Humidity"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@id/progress_bar_humidity"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.826"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.094" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_humidity"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginStart="84dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="28dp"
+                android:indeterminateOnly="false"
+                android:progressDrawable="@drawable/humidity_circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.538"
+                app:layout_constraintStart_toEndOf="@+id/progress_bar_uv"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.741"></ProgressBar>
+
+            <TextView
+                android:id="@+id/hum_percentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="@+id/progress_bar_humidity"
+                app:layout_constraintEnd_toEndOf="@+id/progress_bar_humidity"
+                app:layout_constraintStart_toStartOf="@+id/progress_bar_humidity"
+                app:layout_constraintTop_toTopOf="@+id/progress_bar_humidity"
+                tools:text="60%" />
+
+            <ProgressBar
+                android:id="@+id/progress_bar_uv"
+                android:layout_width="120dp"
+                android:layout_height="120dp"
+                android:layout_marginBottom="8dp"
+                android:indeterminateOnly="false"
+                android:progressDrawable="@drawable/humidity_circle"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.113"
+                app:layout_constraintStart_toStartOf="parent"></ProgressBar>
+
+            <TextView
+                android:id="@+id/uv_percentage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                android:textColor="#FFFFFF"
+                app:layout_constraintBottom_toBottomOf="@+id/progress_bar_uv"
+                app:layout_constraintEnd_toEndOf="@+id/progress_bar_uv"
+                app:layout_constraintStart_toStartOf="@+id/progress_bar_uv"
+                app:layout_constraintTop_toTopOf="@+id/progress_bar_uv"
+                tools:text="60%" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/rain_value"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#FFFFFF"
+                    android:visibility="invisible"
+                    tools:text="60%" />
+
+                <TextView
+                    android:id="@+id/text_view_rain"
+                    android:layout_width="212dp"
+                    android:layout_height="wrap_content"
+                    android:textAlignment="center"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Large"
+                    android:textColor="#FFFFFF" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:gravity="center_horizontal|center_vertical"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_refresh"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+
+            android:layout_marginEnd="30px"
+            android:text="Refresh" />
+
+        <Button
+            android:id="@+id/alert_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="70dp"
+            android:layout_gravity="center"
+            android:text="Send Alerts" />
+    </LinearLayout>
+
+
+</LinearLayout>

@@ -132,12 +132,12 @@ public class FetchData extends Service {
     }
 
     private void checkForAlerts(){
-        if (temp_low!=null && (temperature<temp_low || temperature>temp_high) && sharedPreferences.getLong("prevT",-9999) != temperature){
+        if (temp_low!=null && (temperature<temp_low || temperature>temp_high) && sharedPreferences.getLong("prevT",-9999) != (long)temperature){
             String str = "Temperature Alert! Temperature is "+temperature;
             generateNotification(str);
         }
-        if (humid_low!=null && (humidity < humid_low || humidity > humid_high) && sharedPreferences.getLong("prevH",-9999)!=humidity){
-            String str = "Humidity Alert! Humidity is "+humidity;
+        if (humid_low!=null && (humidity < humid_low || humidity > humid_high) && sharedPreferences.getLong("prevH",-9999)!= (long)humidity) {
+            String str = "Humidity Alert! Humidity is " + humidity;
             generateNotification(str);
         }
         if(rain_check && rain==1 && sharedPreferences.getBoolean("prevR",false) != true){
