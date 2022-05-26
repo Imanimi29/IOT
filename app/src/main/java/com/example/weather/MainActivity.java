@@ -9,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -50,28 +51,19 @@ public class MainActivity extends AppCompatActivity {
 
     private ProgressBar progressBar,progressBar_Rain,progressBar_Humidity;
     private Button btn1;
+    private Button btn_setAlerts;
     private TextView textView,textViewProgress,textView_RainValue,textView_humidityValue,textView_todayDate,title_rain,title_humidity;
     private ConstraintLayout layout;
     private ProgressDialog nDialog;
 
-    private ServiceConnection serviceConnection = new ServiceConnection() {
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            messenger = new Messenger(service);
-            getData();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            messenger = null;
-        }
-    };
+    private ServiceConnection serviceConnection;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
+        bindToService();
 
         Intent intent = new Intent(this,FetchData.class);
         startService(intent);
@@ -81,6 +73,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 getData();
+            }
+        });
+
+        btn_setAlerts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent_ = new Intent(MainActivity.this,Alerts.class);
+                startActivity(intent_);
             }
         });
     }
@@ -108,11 +108,16 @@ public class MainActivity extends AppCompatActivity {
     private void getData() {
         nDialog.show();
 
+        if(messenger==null){
+            bindToService();
+            return;
+        }
+
         Message msg = Message.obtain(null,JOB_1);
         msg.replyTo = new Messenger(new ResponseHandler());
         try {
             messenger.send(msg);
-        } catch (RemoteException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -136,6 +141,7 @@ public class MainActivity extends AppCompatActivity {
         title_rain.setText("Rain");
         title_humidity.setText("Humidity");
         btn1=findViewById(R.id.btn_refresh);
+        btn_setAlerts = findViewById(R.id.btn_setAlerts);
 
         nDialog = new ProgressDialog(this);
         nDialog.setMessage("Updating");
@@ -149,7 +155,6 @@ public class MainActivity extends AppCompatActivity {
         unbindService(serviceConnection);
         messenger = null;
         super.onStop();
-
     }
 
     class ResponseHandler extends Handler {
@@ -166,5 +171,20 @@ public class MainActivity extends AppCompatActivity {
                 super.handleMessage(msg);
             }
         }
+    }
+
+    private void bindToService(){
+        serviceConnection = new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName componentName, IBinder service) {
+                messenger = new Messenger(service);
+                getData();
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName componentName) {
+                messenger = null;
+            }
+        };
     }
 }

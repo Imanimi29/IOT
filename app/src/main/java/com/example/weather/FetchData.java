@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,17 +49,52 @@ public class FetchData extends Service {
     private final int JOB_1 = 1;
     private final int JOB_1_RESPONSE = 2;
 
+    private Long temp_low = null;
+    private Long temp_high = null;
+    private Long humid_low = null;
+    private Long humid_high = null;
+    private Boolean rain_check = null;
+
     private Messenger messenger = new Messenger(new IncomingHadnler());
+
+    SharedPreferences sharedPreferences;
 
     @Override
     public void onCreate() {
         super.onCreate();
+
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
+            startMyOwnForeground();
+        else
+            startForeground(1, new Notification());
 
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             NotificationChannel channel = new NotificationChannel("WeatherAlert","Weather Alert",NotificationManager.IMPORTANCE_DEFAULT);
             NotificationManager manager = getSystemService(NotificationManager.class);
             manager.createNotificationChannel(channel);
         }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private void startMyOwnForeground()
+    {
+        String NOTIFICATION_CHANNEL_ID = "example.permanence";
+        String channelName = "Background Service";
+        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+
+        NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        assert manager != null;
+        manager.createNotificationChannel(chan);
+
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setContentTitle("Monitoring Weather")
+                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .build();
+        startForeground(2, notification);
     }
 
     @Override
@@ -70,9 +106,29 @@ public class FetchData extends Service {
         {
             @Override
             public void run() {
-                counter++;
-                Log.d("FetchDataService","Counter is: "+counter);
-                generateNotification(counter);
+                sharedPreferences = getSharedPreferences("alertData", MODE_PRIVATE);
+
+                temp_low = null;
+                temp_high = null;
+                humid_low = null;
+                humid_high = null;
+                rain_check = null;
+
+                if(sharedPreferences.getBoolean("alertSet",false) == true){
+                    if(sharedPreferences.contains("temp_low")){
+                        temp_low = sharedPreferences.getLong("temp_low",0);
+                        temp_high = sharedPreferences.getLong("temp_high",0);
+                    }
+                    if(sharedPreferences.contains("humid_low")){
+                        humid_low = sharedPreferences.getLong("humid_low",0);
+                        humid_high = sharedPreferences.getLong("humid_high",0);
+                    }
+                    if(sharedPreferences.contains("rain_check")){
+                        rain_check = sharedPreferences.getBoolean("rain_check",false);
+                    }
+                    getData(3,null);
+                }
+
                 mHandler.postDelayed(this,5000);
             }
         };
@@ -84,6 +140,27 @@ public class FetchData extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return messenger.getBinder();
+    }
+
+    private void checkForAlerts(){
+        if (temp_low!=null && (temperature<temp_low || temperature>temp_high) && sharedPreferences.getLong("prevT",-9999) != temperature){
+            String str = "Temperature Alert! Temperature is "+temperature;
+            generateNotification(str);
+        }
+        if (humid_low!=null && (humidity < humid_low || humidity > humid_high) && sharedPreferences.getLong("prevH",-9999)!=humidity){
+            String str = "Humidity Alert! Humidity is "+humidity;
+            generateNotification(str);
+        }
+        if(rain_check && rain==1 && sharedPreferences.getBoolean("prevR",false) != true){
+            String str = "Rain Alert! Rain Detected";
+            generateNotification(str);
+        }
+
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong("prevT", (long)temperature);
+        editor.putLong("prevH",(long)humidity);
+        editor.putBoolean("prevR",(rain == 1) ? true : false);
+        editor.commit();
     }
 
     class IncomingHadnler extends Handler{
@@ -115,6 +192,8 @@ public class FetchData extends Service {
 
                     if(job == JOB_1){
                         sendDataToActivity(msg);
+                    } else if (job == 3){
+                        checkForAlerts();
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -148,10 +227,10 @@ public class FetchData extends Service {
         }
     }
 
-    private void generateNotification(int x){
+    private void generateNotification(String message){
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this,"WeatherAlert");
         builder.setContentTitle("Weather Alert!");
-        builder.setContentText("Rain detected! "+x);
+        builder.setContentText(message);
         builder.setSmallIcon(R.drawable.ic_launcher_background);
         builder.setAutoCancel(true);
 
