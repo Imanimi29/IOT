@@ -47,7 +47,7 @@ public class FetchData extends Service {
     private final int JOB_1 = 1;
     private final int JOB_1_RESPONSE = 2;
 
-    private Messenger messenger = new Messenger(new IncomingHadnler());
+    private Messenger messenger = new Messenger(new IncomingHandler());
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -73,7 +73,7 @@ public class FetchData extends Service {
         return messenger.getBinder();
     }
 
-    class IncomingHadnler extends Handler{
+    class IncomingHandler extends Handler{
 
         @Override
         public void handleMessage(@NonNull Message msg) {

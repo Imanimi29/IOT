@@ -19,6 +19,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -55,6 +56,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView small_icon;
     private LinearLayout layout;
     private ProgressDialog nDialog;
+    private Switch switch_temp;
+    private Boolean switchState;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -92,26 +95,38 @@ public class MainActivity extends AppCompatActivity {
         progressBar_uv.setProgress((int) light);
         progressBar_Humidity.setProgress((int) humidity);
         humidity_percentage.setText(humidity+"%");
-        rain_value.setText(rain+"%");
+        //rain_value.setText(rain+"%");
         uv_percentage.setText(light+"%");
-        temperature_tv.setText(temperature+" F");
-        if(temperature>50)
+        if((int)rain == 1){
+            title_rain.setText("Raining");
+        }else{
+            title_rain.setText("Not raining");
+        }
+        switchState = switch_temp.isChecked();
+        if(switchState){
+            temperature_tv.setText(temperature+"C");
+        }else{
+            temperature_tv.setText(temperature+"F");
+        }
+
+        char degreesymbol = '\u00B0';
+        if(temperature>30)
         {
-            layout.setBackgroundResource(R.drawable.sun);
+            layout.setBackgroundResource(R.drawable.clear_sky);
         }
         else
         {
-            layout.setBackgroundResource(R.drawable.rain);
+            layout.setBackgroundResource(R.drawable.rainy_sky);
         }
         //setting small icon to check if cloudy
-        if(light>500)
+        if(light<100)
         {
-            temp_info.setText("Sunny");
-            small_icon.setBackgroundResource(R.drawable.sun);
+            temp_info.setText("Sunny  ");
+            small_icon.setBackgroundResource(R.drawable.icons8_sun_48px);
         }
         else
         {
-            temp_info.setText("Cloudy");
+            temp_info.setText("Cloudy  ");
             small_icon.setBackgroundResource(R.drawable.icons8_partly_cloudy_day_48px);
         }
         nDialog.dismiss();
@@ -133,6 +148,8 @@ public class MainActivity extends AppCompatActivity {
         tv_location=findViewById(R.id.tv_location);
         temp_info=findViewById(R.id.temp_info);
         small_icon=findViewById(R.id.small_icon);
+        switch_temp=findViewById(R.id.switch_temp);
+        switchState = switch_temp.isChecked();
         //temperature
         progressBar_temp=findViewById(R.id.progress_bar_temp);
         temperature_tv=findViewById(R.id.temp_tv);
@@ -147,9 +164,9 @@ public class MainActivity extends AppCompatActivity {
         title_uv=findViewById(R.id.uv_tv);
         title_uv.setText("UV Index");
         //rain
-        rain_value=findViewById(R.id.rain_value);
+        //rain_value=findViewById(R.id.rain_value);
         title_rain=findViewById(R.id.text_view_rain);
-        title_rain.setText("Rain");
+
         //date
         tv_today_date=findViewById(R.id.tv_today_date);
         Date date = Calendar.getInstance().getTime();
