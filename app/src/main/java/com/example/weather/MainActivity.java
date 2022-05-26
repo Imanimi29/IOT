@@ -2,7 +2,6 @@ package com.example.weather;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
 
 import android.app.ProgressDialog;
 import android.content.ComponentName;
@@ -15,21 +14,12 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.RemoteException;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
-
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -48,10 +38,22 @@ public class MainActivity extends AppCompatActivity {
 
     private Messenger messenger = null;
 
-    private ProgressBar progressBar,progressBar_Rain,progressBar_Humidity;
-    private Button btn1;
-    private TextView textView,textViewProgress,textView_RainValue,textView_humidityValue,textView_todayDate,title_rain,title_humidity;
-    private ConstraintLayout layout;
+    private ProgressBar progressBar_temp;
+    private ProgressBar progressBar_uv;
+    private ProgressBar progressBar_Humidity;
+    private Button refresh_btn;
+    private TextView tv_today_date;
+    private TextView tv_location;
+    private TextView temp_info;
+    private TextView rain_value;
+    private TextView humidity_percentage;
+    private TextView uv_percentage;
+    private TextView temperature_tv;
+    private TextView title_rain;
+    private TextView title_humidity;
+    private TextView title_uv;
+    private ImageView small_icon;
+    private LinearLayout layout;
     private ProgressDialog nDialog;
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -70,14 +72,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.home_page);
         initViews();
 
         Intent intent = new Intent(this,FetchData.class);
         startService(intent);
         bindService(intent,serviceConnection, Context.BIND_AUTO_CREATE);
 
-        btn1.setOnClickListener(new View.OnClickListener() {
+        refresh_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getData();
@@ -86,13 +88,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateProgressBar() {
-        progressBar.setProgress((int) temperature);
-        progressBar_Rain.setProgress(rain);
+        progressBar_temp.setProgress((int) temperature);
+        progressBar_uv.setProgress((int) light);
         progressBar_Humidity.setProgress((int) humidity);
-        textView_humidityValue.setText(humidity+"%");
-        textView_RainValue.setText(rain+"%");
-        char degreesymbol = '\u00B0';
-        textView.setText(temperature+" F");
+        humidity_percentage.setText(humidity+"%");
+        rain_value.setText(rain+"%");
+        uv_percentage.setText(light+"%");
+        temperature_tv.setText(temperature+" F");
         if(temperature>50)
         {
             layout.setBackgroundResource(R.drawable.sun);
@@ -101,7 +103,17 @@ public class MainActivity extends AppCompatActivity {
         {
             layout.setBackgroundResource(R.drawable.rain);
         }
-
+        //setting small icon to check if cloudy
+        if(light>500)
+        {
+            temp_info.setText("Sunny");
+            small_icon.setBackgroundResource(R.drawable.sun);
+        }
+        else
+        {
+            temp_info.setText("Cloudy");
+            small_icon.setBackgroundResource(R.drawable.icons8_partly_cloudy_day_48px);
+        }
         nDialog.dismiss();
     }
 
@@ -118,24 +130,36 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViews(){
-        progressBar=findViewById(R.id.progress_bar);
-        progressBar_Rain=findViewById(R.id.progress_bar2_rain);
-        progressBar_Humidity=findViewById(R.id.progress_bar1_humidity);
-        textView_RainValue=findViewById(R.id.text_view_progress2_rain);
-        textView_humidityValue=findViewById(R.id.text_view_progress1_humidity);
-        textView_todayDate=findViewById(R.id.tv_today_date);
-        layout=(ConstraintLayout)findViewById(R.id.parent_layout);
-        textView=findViewById(R.id.text_view_progress);
-
+        tv_location=findViewById(R.id.tv_location);
+        temp_info=findViewById(R.id.temp_info);
+        small_icon=findViewById(R.id.small_icon);
+        //temperature
+        progressBar_temp=findViewById(R.id.progress_bar_temp);
+        temperature_tv=findViewById(R.id.temp_tv);
+        //humidity
+        progressBar_Humidity=findViewById(R.id.progress_bar_humidity);
+        humidity_percentage=findViewById(R.id.hum_percentage);
+        title_humidity=findViewById(R.id.hum_tv);
+        title_humidity.setText("Humidity");
+        //uv
+        progressBar_uv=findViewById(R.id.progress_bar_uv);
+        uv_percentage=findViewById(R.id.uv_percentage);
+        title_uv=findViewById(R.id.uv_tv);
+        title_uv.setText("UV Index");
+        //rain
+        rain_value=findViewById(R.id.rain_value);
         title_rain=findViewById(R.id.text_view_rain);
-        title_humidity=findViewById(R.id.text_view_humidity);
+        title_rain.setText("Rain");
+        //date
+        tv_today_date=findViewById(R.id.tv_today_date);
         Date date = Calendar.getInstance().getTime();
         SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
         String formattedDate = df.format(date);
-        textView_todayDate.setText(formattedDate);
-        title_rain.setText("Rain");
-        title_humidity.setText("Humidity");
-        btn1=findViewById(R.id.btn_refresh);
+        tv_today_date.setText(formattedDate);
+
+        layout= (LinearLayout)findViewById(R.id.parent_layout);
+
+        refresh_btn=findViewById(R.id.btn_refresh);
 
         nDialog = new ProgressDialog(this);
         nDialog.setMessage("Updating");

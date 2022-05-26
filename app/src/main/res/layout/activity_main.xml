@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-android:id="@+id/parent_layout"
+    android:id="@+id/parent_layout"
     tools:context=".MainActivity">
 
     <TextView
@@ -23,26 +23,29 @@ android:id="@+id/parent_layout"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent">
     </TextView>
+
+
     <ProgressBar
-        android:layout_marginTop="10dp"
-        android:id="@+id/progress_bar"
-        android:indeterminateOnly="false"
-        android:progressDrawable="@drawable/circle"
+        android:id="@+id/progress_bar_temp"
         android:layout_width="220dp"
         android:layout_height="220dp"
+        android:layout_marginTop="10dp"
+        android:indeterminateOnly="false"
+        android:progressDrawable="@drawable/circle"
+        android:visibility="visible"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title"
         tools:progress="60" />
     <TextView
-        android:id="@+id/text_view_progress"
+        android:id="@+id/temp_tv"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        app:layout_constraintBottom_toBottomOf="@+id/progress_bar"
-        app:layout_constraintEnd_toEndOf="@+id/progress_bar"
-        app:layout_constraintStart_toStartOf="@+id/progress_bar"
-        app:layout_constraintTop_toTopOf="@+id/progress_bar"
+        app:layout_constraintBottom_toBottomOf="@+id/progress_bar_temp"
+        app:layout_constraintEnd_toEndOf="@+id/progress_bar_temp"
+        app:layout_constraintStart_toStartOf="@+id/progress_bar_temp"
+        app:layout_constraintTop_toTopOf="@+id/progress_bar_temp"
         tools:text="60%" />
     <TextView
         android:layout_width="match_parent"
@@ -52,7 +55,7 @@ android:id="@+id/parent_layout"
         android:layout_height="wrap_content"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/progress_bar"
+        app:layout_constraintTop_toBottomOf="@+id/progress_bar_temp"
         >
 
     </TextView>
@@ -68,7 +71,7 @@ android:id="@+id/parent_layout"
         >
         //humidity
         <ProgressBar
-            android:id="@+id/progress_bar1_humidity"
+            android:id="@+id/progress_bar_humidity"
             android:indeterminateOnly="false"
             android:progressDrawable="@drawable/humidity_circle"
             android:layout_width="120dp"
@@ -77,24 +80,24 @@ android:id="@+id/parent_layout"
             android:layout_marginRight="30dp"
             app:layout_constraintTop_toTopOf="parent"></ProgressBar>
         <TextView
-            android:id="@+id/text_view_progress1_humidity"
+            android:id="@+id/hum_percentage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            app:layout_constraintBottom_toBottomOf="@+id/progress_bar1_humidity"
-            app:layout_constraintEnd_toEndOf="@+id/progress_bar1_humidity"
-            app:layout_constraintStart_toStartOf="@+id/progress_bar1_humidity"
-            app:layout_constraintTop_toTopOf="@+id/progress_bar1_humidity"
+            app:layout_constraintBottom_toBottomOf="@+id/progress_bar_humidity"
+            app:layout_constraintEnd_toEndOf="@+id/progress_bar_humidity"
+            app:layout_constraintStart_toStartOf="@+id/progress_bar_humidity"
+            app:layout_constraintTop_toTopOf="@+id/progress_bar_humidity"
             tools:text="60%" />
         <TextView
             android:id="@+id/text_view_humidity"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
-            app:layout_constraintBottom_toBottomOf="@+id/progress_bar1_humidity"
-            app:layout_constraintEnd_toEndOf="@+id/progress_bar1_humidity"
-            app:layout_constraintStart_toStartOf="@+id/progress_bar1_humidity"
-            app:layout_constraintTop_toBottomOf="@+id/progress_bar1_humidity"
+            app:layout_constraintBottom_toBottomOf="@+id/progress_bar_humidity"
+            app:layout_constraintEnd_toEndOf="@+id/progress_bar_humidity"
+            app:layout_constraintStart_toStartOf="@+id/progress_bar_humidity"
+            app:layout_constraintTop_toBottomOf="@+id/progress_bar_humidity"
             tools:text="Humidity" />
         //rain
         <ProgressBar
@@ -108,7 +111,7 @@ android:id="@+id/parent_layout"
             app:layout_constraintTop_toTopOf="parent"
             ></ProgressBar>
         <TextView
-            android:id="@+id/text_view_progress2_rain"
+            android:id="@+id/rain_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.AppCompat.Large"
@@ -132,15 +135,16 @@ android:id="@+id/parent_layout"
 
     <Button
         android:id="@+id/btn_refresh"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center|bottom"
-        android:text="Refresh"
+        android:layout_margin="0dp"
 
+        android:text="Refresh"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/inner_linearLayout"
+        app:layout_constraintStart_toStartOf="@+id/inner_linearLayout"
         app:layout_constraintTop_toBottomOf="@+id/inner_linearLayout"
-        app:layout_constraintVertical_bias="0.959"
-        android:layout_margin="0dp"/>
+        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
