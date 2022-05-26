@@ -20,6 +20,7 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -44,18 +45,11 @@ public class FetchData extends Service {
     private int rain;
     private double light;
 
-    private int counter = 0;
-
-    private final int JOB_1 = 1;
-    private final int JOB_1_RESPONSE = 2;
-
     private Long temp_low = null;
     private Long temp_high = null;
     private Long humid_low = null;
     private Long humid_high = null;
     private Boolean rain_check = null;
-
-    private Messenger messenger = new Messenger(new IncomingHadnler());
 
     SharedPreferences sharedPreferences;
 
@@ -137,11 +131,6 @@ public class FetchData extends Service {
         return START_STICKY;
     }
 
-    @Override
-    public IBinder onBind(Intent intent) {
-        return messenger.getBinder();
-    }
-
     private void checkForAlerts(){
         if (temp_low!=null && (temperature<temp_low || temperature>temp_high) && sharedPreferences.getLong("prevT",-9999) != temperature){
             String str = "Temperature Alert! Temperature is "+temperature;
@@ -163,20 +152,6 @@ public class FetchData extends Service {
         editor.commit();
     }
 
-    class IncomingHadnler extends Handler{
-
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            if(msg.what == JOB_1){
-                Message msgCopy = Message.obtain(msg);
-                getData(JOB_1,msgCopy);
-            }
-            else {
-                super.handleMessage(msg);
-            }
-        }
-    }
-
     private void getData(int job, Message msg) {
         RequestQueue requestQueue = Volley.newRequestQueue(this);
 
@@ -190,9 +165,7 @@ public class FetchData extends Service {
                     rain = Integer.parseInt(((JSONObject) response.getJSONArray("feeds").get(0)).get("field3").toString());
                     light = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field4").toString());
 
-                    if(job == JOB_1){
-                        sendDataToActivity(msg);
-                    } else if (job == 3){
+                    if (job == 3){
                         checkForAlerts();
                     }
                 } catch (JSONException e) {
@@ -207,24 +180,6 @@ public class FetchData extends Service {
         });
 
         requestQueue.add(jsonObjectRequest);
-    }
-
-    private void sendDataToActivity(Message msg){
-        Bundle bundle = new Bundle();
-        Message message = android.os.Message.obtain(null,JOB_1_RESPONSE);
-
-        bundle.putDouble("temperature",temperature);
-        bundle.putDouble("humidity",humidity);
-        bundle.putDouble("light",light);
-        bundle.putInt("rain",rain);
-
-        message.setData(bundle);
-
-        try {
-            msg.replyTo.send(message);
-        } catch (RemoteException e) {
-            e.printStackTrace();
-        }
     }
 
     private void generateNotification(String message){
@@ -247,5 +202,11 @@ public class FetchData extends Service {
         this.sendBroadcast(broadcastIntent);
 
         super.onDestroy();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 }

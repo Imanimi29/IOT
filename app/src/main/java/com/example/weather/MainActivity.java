@@ -44,9 +44,6 @@ public class MainActivity extends AppCompatActivity {
     private double humidity = 0;
     private double light = 0;
 
-    private final int JOB_1 = 1;
-    private final int JOB_1_RESPONSE = 2;
-
     private Messenger messenger = null;
 
     private ProgressBar progressBar,progressBar_Rain,progressBar_Humidity;
@@ -63,11 +60,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        bindToService();
+        getData();
 
         Intent intent = new Intent(this,FetchData.class);
         startService(intent);
-        bindService(intent,serviceConnection, Context.BIND_AUTO_CREATE);
 
         btn1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,18 +104,30 @@ public class MainActivity extends AppCompatActivity {
     private void getData() {
         nDialog.show();
 
-        if(messenger==null){
-            bindToService();
-            return;
-        }
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
 
-        Message msg = Message.obtain(null,JOB_1);
-        msg.replyTo = new Messenger(new ResponseHandler());
-        try {
-            messenger.send(msg);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, "https://api.thingspeak.com/channels/1733817/feeds.json?api_key=R479FUYYPK4LX4I3&results=1", null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.d("API response", response.toString());
+                try {
+                    temperature = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field1").toString());
+                    humidity = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field2").toString());
+                    rain = Integer.parseInt(((JSONObject) response.getJSONArray("feeds").get(0)).get("field3").toString());
+                    light = Double.parseDouble(((JSONObject) response.getJSONArray("feeds").get(0)).get("field4").toString());
+                    updateProgressBar();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("API Error!",error.toString());
+            }
+        });
+
+        requestQueue.add(jsonObjectRequest);
     }
 
     private void initViews(){
@@ -148,43 +156,5 @@ public class MainActivity extends AppCompatActivity {
         nDialog.setTitle("Updating");
         nDialog.setIndeterminate(false);
         nDialog.setCancelable(false);
-    }
-
-    @Override
-    protected void onStop() {
-        unbindService(serviceConnection);
-        messenger = null;
-        super.onStop();
-    }
-
-    class ResponseHandler extends Handler {
-        @Override
-        public void handleMessage(@NonNull Message msg) {
-            if(msg.what == JOB_1_RESPONSE){
-                temperature = msg.getData().getDouble("temperature");
-                rain = msg.getData().getInt("rain");
-                humidity = msg.getData().getDouble("humidity");
-                light = msg.getData().getDouble("light");
-                updateProgressBar();
-            }
-            else{
-                super.handleMessage(msg);
-            }
-        }
-    }
-
-    private void bindToService(){
-        serviceConnection = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder service) {
-                messenger = new Messenger(service);
-                getData();
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                messenger = null;
-            }
-        };
     }
 }
